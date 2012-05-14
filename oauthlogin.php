@@ -24,17 +24,15 @@ session_start();
 require_once('config.php');
 require_once('twitteroauth.php'); 
 
-
 // Build OAuth credentials
 $connection = new TwitterOAuth($tk_oauth_consumer_key, $tk_oauth_consumer_secret);
- 
+
 // Get Temporary Credentials
 $request_token = $connection->getRequestToken($tk_your_url.'callback.php');
 
 // Save Temp Credentials to Session
 $_SESSION['oauth_token'] = $token = $request_token['oauth_token'];
 $_SESSION['oauth_token_secret'] = $request_token['oauth_token_secret'];
-
 $url = $connection->getAuthorizeURL($token);
 header('Location: ' . $url);
  

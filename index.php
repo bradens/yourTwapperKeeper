@@ -48,6 +48,16 @@ $logged_in = TRUE;
 <link href="resources/css/yourtwapperkeeper.css?v=2" rel="stylesheet" type="text/css">
 <script src="resources/js/jquery-1.4.2.min.js"></script>
 <script src="resources/js/jquery-ui-1.8.4.custom.min.js"></script>
+<script type="text/javascript">
+	$(document).ready(function() {
+		$("#workingdialog").dialog({
+			autoOpen: false,  
+			height: 300,
+			width: 300,
+			modal: true
+		});
+	});
+</script>
 </head>
 
 <body>
@@ -99,57 +109,82 @@ if (in_array($_SESSION['access_token']['screen_name'],$admin_screen_name)) {
 $archives = $tk->listArchive();
 echo "<table>";
 echo "<tr><th>Archive ID</th><th>Keyword / Hashtag</th><th>Description</th><th>Tags</th><th>Screen Name</th><th>Count</th><th>Create Time</th><th></th></tr>";
-foreach ($archives['results'] as $value) {
-	echo "<tr><td>".$value['id']."</td><td>".$value['keyword']."</td><td>".$value['description']."</td><td>".$value['tags']."</td><td>".$value['screen_name']."</td><td>".$value['count']."</td><td>".date(DATE_RFC2822,$value['create_time'])."</td>";
-	echo "<td>";
-	echo "<a href='archive.php?id=".$value['id']."' target='_blank' alt='View'><img src='./resources/binoculars_24.png' alt='View Archive' title='View Archive'/></a>";
-	if ($_SESSION['access_token']['screen_name'] == $value['screen_name']) {
-		?>
-		<script type="text/javascript">
-    		$(function() {  
-    			$("#deletedialog<?php echo $value['id']; ?>").dialog({
-            		autoOpen: false,  
-            		height: 150,
-            		width: 800,
-            		modal: true
-            		});
-            
-            	$('#deletelink<?php echo $value['id']; ?>').click(function(){
-            		$('#deletedialog<?php echo $value['id']; ?>').dialog('open');
-            		return false;
-            		});
-            	
-            	$("#updatedialog<?php echo $value['id']; ?>").dialog({
-            		autoOpen: false,  
-            		height: 300,
-            		width: 300,
-            		modal: true
-            		});
-            
-            	$('#updatelink<?php echo $value['id']; ?>').click(function(){
-            		$('#updatedialog<?php echo $value['id']; ?>').dialog('open');
-            		return false;
-            		});
-            		
-            		
-            	});          
- 		</script>
- 		
- 		<div id = 'deletedialog<?php echo $value['id']; ?>' title='Are you sure you want to delete <?php echo $value['keyword']; ?> archive?'>
- 		<br><br><center><form method='post' action='delete.php'><input type='hidden' name='id' value='<?php echo $value['id']; ?>'/><input type='submit' value='Yes'/></form></center>
- 		</div> 
- 		
- 		 <div id = 'updatedialog<?php echo $value['id']; ?>' title='Update <?php echo $value['keyword']; ?> archive'>
-		<br><br><center><form method='post' action='update.php'>Description<br><input name='description' value='<?php echo $value['description']; ?>'/><br><br>Tags<br><input name='tags' value='<?php echo $value['tags']; ?>'/><input type='hidden' name='id' value='<?php echo $value['id']; ?>'/><br><br><p><input type='submit' value='Update'/></p></form></center>
- 		</div> 
- 		<?php
-		echo "<a href='#' id='updatelink".$value['id']."'><img src='./resources/pencil_24.png' alt='Edit Archive' title='Edit Archive'/></a>";
-		echo "  <a href='#' id='deletelink".$value['id']."'><img src='./resources/close_2_24.png' alt='Delete Archive' title='Delete Archive'/></a>";
-		}
-		
-	echo "</td>";
-	echo "</tr>";
+if (ISSET($archives['results'])) {
+	foreach ($archives['results'] as $value) {
+		echo "<tr><td>".$value['id']."</td><td>".$value['keyword']."</td><td>".$value['description']."</td><td>".$value['tags']."</td><td>".$value['screen_name']."</td><td>".$value['count']."</td><td>".date(DATE_RFC2822,$value['create_time'])."</td>";
+		echo "<td>";
+		echo "<a href='archive.php?id=".$value['id']."' target='_blank' alt='View'><img src='./resources/binoculars_24.png' alt='View Archive' title='View Archive'/></a>";
+		if ($_SESSION['access_token']['screen_name'] == $value['screen_name']) {
+			?>
+			<script type="text/javascript">
+	    		$(function() {  
+	    			$("#deletedialog<?php echo $value['id']; ?>").dialog({
+		    		autoOpen: false,  
+		    		height: 150,
+		    		width: 800,
+		    		modal: true
+		    		});
+		    
+		    	$('#deletelink<?php echo $value['id']; ?>').click(function(){
+		    		$('#deletedialog<?php echo $value['id']; ?>').dialog('open');
+		    		return false;
+		    		});
+		    	
+		    	$("#updatedialog<?php echo $value['id']; ?>").dialog({
+		    		autoOpen: false,  
+		    		height: 300,
+		    		width: 300,
+		    		modal: true
+		    		});
+		    	
+		    	$('#updatelink<?php echo $value['id']; ?>').click(function(){
+		    		$('#updatedialog<?php echo $value['id']; ?>').dialog('open');
+		    		return false;
+		    		});
+		    	});          
+		    	$(document).ready(function() {
+					$('#exportlink<?php echo $value['id']; ?>').click(function() {
+						$('#workingdialog').dialog('open');
+						$.get('export.php', {'id':'<?php echo $value['id']; ?>'}, function(res) {
+							$("#workingdialog").dialog('close');
+							window.location.href = 'resources/export<?php echo $value['id']; ?>.csv';
+						}); 
+					});
+					$('#exportmentions<?php echo $value['id']; ?>').click(function() {
+						$('#workingdialog').dialog('open');
+						$.get('exportmentions.php', {'id':'<?php echo $value['id']; ?>'}, function(res) {
+							$("#workingdialog").dialog('close');
+							window.location.href = 'resources/exportmentions<?php echo $value['id']; ?>.csv';
+						}); 
+					});
+					$('#exportusers<?php echo $value['id']; ?>').click(function() {
+						$('#workingdialog').dialog('open');
+						$.get('exportusers.php', {'id':'<?php echo $value['id']; ?>'}, function(res) {
+							$("#workingdialog").dialog('close');
+							window.location.href = 'resources/exportusers<?php echo $value['id']; ?>.csv';
+						}); 
+					});
+		    	});
+	 		</script>
+	 		
+	 		<div id = 'deletedialog<?php echo $value['id']; ?>' title='Are you sure you want to delete <?php echo $value['keyword']; ?> archive?'>
+	 		<br><br><center><form method='post' action='delete.php'><input type='hidden' name='id' value='<?php echo $value['id']; ?>'/><input type='submit' value='Yes'/></form></center>
+	 		</div> 
+	 		
+	 		 <div id = 'updatedialog<?php echo $value['id']; ?>' title='Update <?php echo $value['keyword']; ?> archive'>
+			<br><br><center><form method='post' action='update.php'>Description<br><input name='description' value='<?php echo $value['description']; ?>'/><br><br>Tags<br><input name='tags' value='<?php echo $value['tags']; ?>'/><input type='hidden' name='id' value='<?php echo $value['id']; ?>'/><br><br><p><input type='submit' value='Update'/></p></form></center>
+	 		</div> 
+	 		<?php
+			echo "<a href='#' id='updatelink".$value['id']."'><img src='./resources/pencil_24.png' alt='Edit Archive' title='Edit Archive'/></a>";
+			echo "  <a href='#' id='deletelink".$value['id']."'><img src='./resources/close_2_24.png' alt='Delete Archive' title='Delete Archive'/></a>";
+			echo "	<a id='exportlink".$value['id']."'><img src='./resources/export.png' alt='Export Archive' title='Export Tweets'/>Export Tweets</a>";
+			echo "	<a id='exportmentions".$value['id']."'><img src='./resources/export.png' alt='Export Mentions' title='Export Mentions'/>Export mentions</a>";
+			echo "	<a id='exportusers".$value['id']."'><img src='./resources/export.png' alt='Export Users' title='Export Users'/>Export users</a>";
+			}
+		echo "</td>";
+		echo "</tr>";
 	
+	}
 }
 echo "</table>";
 ?>
@@ -160,6 +195,11 @@ echo "</table>";
 <div id='footer'>
 <p>Your TwapperKeeper - <?php echo $yourtwapperkeeper_version; ?></p>
 </div>
-
+<div id="workingdialog">
+	<center>
+		<h2>Working...</h2>
+		<img src="./resources/loading.gif" height="31" width="31"/>
+	</center>
+</div>
 </body>
 </html>

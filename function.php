@@ -115,6 +115,7 @@ function createArchive($keyword,$description,$tags,$screen_name,$user_id,$debug=
         `geo_coordinates_0` double NOT NULL,
         `geo_coordinates_1` double NOT NULL,
         `created_at` varchar(50) NOT NULL,
+        `to_users` varchar(1000),
         `time` int(11) NOT NULL,
         FULLTEXT `full` (`text`),
         INDEX `source` (`from_user`),
@@ -126,7 +127,24 @@ function createArchive($keyword,$description,$tags,$screen_name,$user_id,$debug=
         ) ENGINE=MyISAM DEFAULT CHARSET=latin1";
        
     $r = mysql_query($create_table, $db->connection);
-       
+    $create_table_mentions = "CREATE TABLE IF NOT EXISTS z_mentions_".$lastid." (
+		from_user varchar(100) NOT NULL,
+		to_user varchar(100) NOT NULL,
+		tweet_id varchar(100) NOT NULL,
+		id int NOT NULL	PRIMARY KEY AUTO_INCREMENT
+		) ENGINE=MyISAM DEFAULT CHARSET=latin1";   
+    $r = mysql_query($create_table_mentions, $db->connection);
+    
+    $create_table_users = "CREATE TABLE IF NOT EXISTS z_users_".$lastid." (
+		`id` varchar(100) NOT NULL PRIMARY KEY,
+		`tweet_count` int NOT NULL,
+		`followers_count` int NOT NULL,
+		`following_count` int NOT NULL,
+		`location` varchar(100),
+		`name` varchar(100) NOT NULL
+	) ENGINE=MyISAM DEFAULT CHARSET=latin1";
+    $r = mysql_query($create_table_users, $db->connection);
+    
     $response[0] = "Archive has been created.";
 	return($response);
 	}
@@ -210,12 +228,13 @@ function deleteArchive($id) {
 	
 	$q = "drop table if exists z_$id";
 	$r = mysql_query($q, $db->connection);
-	
+	$q = "drop table if exists z_mentions_".$id;
+	$r = mysql_query(q, $db->connection);
+	$q = "drop table if exists z_users_".$id;
+	$r = mysql_query(q, $db->connection);
 	$response[0] = "Archive has been deleted.";
 	return($response);
-	
-	
-	}
+}
 
 // update archive
 function updateArchive($id,$description,$tags) {

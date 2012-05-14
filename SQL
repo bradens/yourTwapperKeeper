@@ -74,3 +74,4 @@ CREATE TABLE IF NOT EXISTS `rawstream` (
   FULLTEXT KEY `text` (`text`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
+-- USERS schema

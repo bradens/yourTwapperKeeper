@@ -36,20 +36,23 @@ while (TRUE) {
 	// for each tweet in memory, compare against predicates and insert
 	foreach ($batch as $tweet) {
 		echo "[".$tweet['id']." - ".$tweet['text']."]\n";
-        foreach ($preds as $ztable=>$keyword) {
-        	if (stristr($tweet['text'],$keyword) == TRUE && preg_match($usernameRegex, $tweet['text'])) {
+        foreach ($preds as $ztable=>$keyword) 
+        {
+        	if (stristr($tweet['text'],$keyword) == TRUE && preg_match($usernameRegex, $tweet['text'])) 
+        	{
 		        preg_match_all($usernameRegex, $tweet['text'], $matches);
         		$tweetToUsers = implode(", ", $matches[0]);
-			echo " vs. $keyword = insert\n";
+				echo " vs. $keyword = insert\n";
         		$q_insert = "insert into z_$ztable values ('twitter-stream','".$tweet['text']."','".$tweet['to_user_id']."','".$tweet['from_user']."','".$tweet['id']."','".$tweet['from_user_id']."','".$tweet['iso_language_code']."','".$tweet['source']."','".$tweet['profile_image_url']."','".$tweet['geo_type']."','".$tweet['geo_coordinates_0']."','".$tweet['geo_coordinates_1']."','".$tweet['created_at']."','".$tweetToUsers."','".$tweet['time']."')";
         		
         		$r_insert = mysql_query($q_insert, $db->connection);
-			// Now insert into the mentions table for each mention
-			for ($i = 0; $i < count($matches[0]);$i++) {
-			    $q_insert_mentions = "INSERT INTO z_mentions_".$ztable." values ('".$tweet['from_user']."','".substr($matches[0][$i], 1)."','".$tweet['id']."', default);";
-			    $r_insert = mysql_query($q_insert_mentions, $db->connection);
+				// Now insert into the mentions table for each mention
+				for ($i = 0; $i < count($matches[0]);$i++) 
+				{
+					$q_insert_mentions = "INSERT INTO z_mentions_".$ztable." values ('".$tweet['from_user']."','".substr($matches[0][$i], 1)."','".$tweet['id']."', default);";
+					$r_insert = mysql_query($q_insert_mentions, $db->connection);
 				}	
-					// check against users in the table
+					/*// check against users in the table
 					$q_check_user = "SELECT id from z_users_".$ztable." where tweet_count is NULL;";
 					$res = mysql_query($q_check_user, $db->connection);
 					if (mysql_num_rows($res) > 99)
@@ -102,15 +105,15 @@ while (TRUE) {
 						}
 						//fputs($fd, $curlData);					
 						//curl request
-						/*$curl = curl_init();
+						$curl = curl_init();
 						curl_setopt($curl, CURLOPT_URL, $url);
 						curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
 						$curlData = curl_exec($curl);
 						curl_close($curl);
-						*///decoding json structure into array
+						//decoding json structure into array
 						//$user = $curlData['user'];
 						fclose($fd);
-					}
+					}*/
 					$q_insert_users = "INSERT INTO z_users_".$ztable." values('".$tweet['from_user']."', null, null, null, null, null);";
 					mysql_query($q_insert_users, $db->connection);
         	} else {

@@ -23,15 +23,34 @@
 	mysql_query($q_delete_user, $db->connection); 
 	
 	fputs($fd, mysql_num_rows($res));
-	$url = "http://api.twitter.com/1/users/lookup.json?screen_name=";
-	for ($i = 0;$i < mysql_num_rows($res);$i++)
+	for ($reqs = 0;$reqs < (mysql_num_rows($res) % 100)+1;$reqs++)
 	{
-		$row = mysql_fetch_assoc($res);
-		$url = $url.$row['id'];
-		if ($i != mysql_num_rows($res)-1)
-			$url = $url.",";
+		$url = "http://api.twitter.com/1/users/lookup.json?screen_name=";
+		for ($i = 0;$i < 100;$i++)
+		{
+			$row = mysql_fetch_assoc($res);
+			if (is_null($row))
+				break;
+			$url = $url.$row['id'];
+			if ($i != mysql_num_rows($res)-1)
+				$url = $url.",";
+		}
+		$url = $url."&include_entities=true";
+		echo $url;
+		$curl = curl_init();
+		curl_setopt($curl, CURLOPT_URL, $url);
+		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+		$curlData = curl_exec($curl);
+		curl_close($curl);
+		$curlData = json_decode($curlData, true);
+		foreach ($curlData as $user)
+		{
+			fputs($fd, $user);
+			$q_insert_users = "INSERT INTO z_users_".$archiveID." values('".$user['screen_name']."', '".$user['statuses_count']."', '".$user['followers_count']."', '".$user['friends_count']."', '".$user['location']."', '".$user['name']."');";	
+			mysql_query($q_insert_users, $db->connection);
+		}
+		fclose($fd);
 	}
-	$url = $url."&include_entities=true";
 	fputs($fd, $url);
 	// Now grab that user's info from twitter api.					
 	/*$oauth = array( 'oauth_consumer_key' => $tk_oauth_consumer_key, 
@@ -59,22 +78,10 @@
 	*/
 	
 	//curl request
-	echo $url;
-	$curl = curl_init();
-	curl_setopt($curl, CURLOPT_URL, $url);
-	curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-	$curlData = curl_exec($curl);
-	curl_close($curl);
+	
 	
 	//decoding json structure into array
-	$curlData = json_decode($curlData, true);
-	foreach ($curlData as $user)
-	{
-		fputs($fd, $user);
-		$q_insert_users = "INSERT INTO z_users_".$archiveID." values('".$user['screen_name']."', '".$user['statuses_count']."', '".$user['followers_count']."', '".$user['friends_count']."', '".$user['location']."', '".$user['name']."');";	
-		mysql_query($q_insert_users, $db->connection);
-	}
-	fclose($fd);
+	
 
 	$sqlData = 'SELECT * FROM z_users_'.$archiveID;
 	$res = mysql_query($sqlData, $connection);

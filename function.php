@@ -137,11 +137,11 @@ function createArchive($keyword,$description,$tags,$screen_name,$user_id,$debug=
     
     $create_table_users = "CREATE TABLE IF NOT EXISTS z_users_".$lastid." (
 		`id` varchar(100) NOT NULL PRIMARY KEY,
-		`tweet_count` int NOT NULL,
-		`followers_count` int NOT NULL,
-		`following_count` int NOT NULL,
+		`tweet_count` int,
+		`followers_count` int,
+		`following_count` int,
 		`location` varchar(100),
-		`name` varchar(100) NOT NULL
+		`name` varchar(100)
 	) ENGINE=MyISAM DEFAULT CHARSET=latin1";
     $r = mysql_query($create_table_users, $db->connection);
     
@@ -297,6 +297,7 @@ function killProcess($pid) {
 
 // start archiving process
 function startProcess($cmd) {
+	//$command = "$cmd > /tmp/twapperlog 2>&1 & echo $!";
 	$command = "$cmd > /dev/null 2>&1 & echo $!";
     exec($command ,$op);
     $pid = (int)$op[0];

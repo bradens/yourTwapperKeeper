@@ -51,6 +51,8 @@ while (TRUE) {
 				{
 					$q_insert_mentions = "INSERT INTO z_mentions_".$ztable." values ('".$tweet['from_user']."','".substr($matches[0][$i], 1)."','".$tweet['id']."', default);";
 					$r_insert = mysql_query($q_insert_mentions, $db->connection);
+					$q_insert_users = "INSERT INTO z_users_".$ztable." values('".substr($matches[0][$i], 1)."', null, null, null, null, null);";
+                                        mysql_query($q_insert_users, $db->connection);
 				}	
 					/*// check against users in the table
 					$q_check_user = "SELECT id from z_users_".$ztable." where tweet_count is NULL;";
@@ -116,6 +118,7 @@ while (TRUE) {
 					}*/
 					$q_insert_users = "INSERT INTO z_users_".$ztable." values('".$tweet['from_user']."', null, null, null, null, null);";
 					mysql_query($q_insert_users, $db->connection);
+	
         	} else {
         		echo " vs. $keyword = not found\n";
         		}
